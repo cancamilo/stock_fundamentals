@@ -5,12 +5,15 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
+    "fpdf>=1.7.2",
     "ipykernel>=6.29.5",
+    "markdown2>=2.5.3",
     "matplotlib>=3.10.1",
     "nbformat>=5.10.4",
     "numpy>=2.2.4",
     "openai>=1.73.0",
     "pandas>=2.2.3",
+    "pdfkit>=1.0.0",
     "plotly>=6.0.1",
     "python-dotenv>=1.1.0",
     "requests>=2.32.3",
