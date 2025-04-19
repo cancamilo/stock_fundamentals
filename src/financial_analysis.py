@@ -6,6 +6,7 @@ This module provides functions to analyze financial data and calculate key finan
 
 import pandas as pd
 import numpy as np
+from src.data import StockData
 
 
 class FinancialAnalysis:
@@ -129,32 +130,28 @@ class FinancialAnalysis:
         # Extract data from income statement
         if not self.stock_data.income_stmt_annual.empty:
             recent_year = self.stock_data.income_stmt_annual.columns[0]
-            revenue = self.stock_data.income_stmt_annual.loc.get('Total Revenue', None)
+            revenue = self.stock_data.income_stmt_annual.loc['Total Revenue', recent_year] / 1e6
+            
             if revenue is not None:
-                revenue = revenue.get(recent_year, 0) / 1e6
                 highlights.append(f"Revenue: ${revenue:.2f}M")
             
-            net_income = self.stock_data.income_stmt_annual.loc.get('Net Income', None)
+            net_income = self.stock_data.income_stmt_annual.loc['Net Income', recent_year] / 1e6
             if net_income is not None:
-                net_income = net_income.get(recent_year, 0) / 1e6
                 highlights.append(f"Net Income: ${net_income:.2f}M")
             
-            ebitda = self.stock_data.income_stmt_annual.loc.get('EBITDA', None)
+            ebitda = self.stock_data.income_stmt_annual.loc['EBITDA', recent_year] / 1e6
             if ebitda is not None:
-                ebitda = ebitda.get(recent_year, 0) / 1e6
                 highlights.append(f"EBITDA: ${ebitda:.2f}M")
         
         # Extract data from balance sheet
         if not self.stock_data.balance_sheet_annual.empty:
             recent_year = self.stock_data.balance_sheet_annual.columns[0]
-            total_assets = self.stock_data.balance_sheet_annual.loc.get('Total Assets', None)
+            total_assets = self.stock_data.balance_sheet_annual.loc['Total Assets', recent_year] / 1e6
             if total_assets is not None:
-                total_assets = total_assets.get(recent_year, 0) / 1e6
                 highlights.append(f"Total Assets: ${total_assets:.2f}M")
             
-            total_liabilities = self.stock_data.balance_sheet_annual.loc.get('Total Liabilities Net Minority Interest', None)
+            total_liabilities = self.stock_data.balance_sheet_annual.loc['Total Liabilities Net Minority Interest', recent_year]
             if total_liabilities is not None:
-                total_liabilities = total_liabilities.get(recent_year, 0) / 1e6
                 highlights.append(f"Total Liabilities: ${total_liabilities:.2f}M")
                 
                 # Calculate equity
