@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 class AIAnalysis:
     """Class for AI-powered stock analysis."""
     
-    def __init__(self, api_key=None):
+    def __init__(self, api_key=None, model="gpt-4o-mini"):
         """
         Initialize with OpenAI API key.
         
@@ -28,6 +28,7 @@ class AIAnalysis:
         
         self.api_key = api_key
         self.client = None
+        self.default_model = model
         
         if self.api_key:
             try:
@@ -81,7 +82,7 @@ class AIAnalysis:
                     """
                 
             response = self.client.responses.create(
-                model="gpt-4o-mini",
+                model=self.default_model,
                 tools=[{ "type": "web_search_preview" }],
                 input=prompt,
             )
@@ -161,7 +162,7 @@ class AIAnalysis:
             """
             
             response = self.client.chat.completions.create(
-                model="gpt-4o-mini",  # Use appropriate model based on your OpenAI subscription
+                model=self.default_model,  # Use appropriate model based on your OpenAI subscription
                 messages=[
                     {"role": "system", "content": "You are a senior financial analyst with extensive experience in equity research and investment analysis."},
                     {"role": "user", "content": prompt}
@@ -173,3 +174,84 @@ class AIAnalysis:
             return response.choices[0].message.content
         except Exception as e:
             return f"Error generating comprehensive report: {e}"
+
+    def compare_stocks(self, symbols, returns_stats=None, correlation_matrix=None, financial_ratios=None, tech_indicators=None, sector_info=None):
+        """
+        Generate a comparative analysis of multiple stocks.
+        
+        Args:
+            symbols (list): List of stock ticker symbols to compare
+            returns_stats (DataFrame, optional): DataFrame with return statistics for each stock
+            correlation_matrix (DataFrame, optional): Correlation matrix of stock returns
+            financial_ratios (DataFrame, optional): DataFrame with financial ratios for each stock
+            tech_indicators (DataFrame, optional): DataFrame with technical indicators for each stock
+            sector_info (dict, optional): Dictionary with sector information for context
+            
+        Returns:
+            str: Comparative analysis text
+        """
+        if self.client is None:
+            return "OpenAI client not initialized. Please set up your API key."
+        
+        try:
+            # Current date for context
+            today = datetime.now().strftime("%Y-%m-%d")
+            
+            # Format data for the prompt
+            returns_data = returns_stats.to_string() if returns_stats is not None else "Not provided"
+            correlation_data = correlation_matrix.to_string() if correlation_matrix is not None else "Not provided"
+            financial_data = financial_ratios.to_string() if financial_ratios is not None else "Not provided"
+            tech_data = tech_indicators.to_string() if tech_indicators is not None else "Not provided"
+            
+            # Build sector context if available
+            sector_context = ""
+            if sector_info:
+                sector_context = f"""
+                SECTOR CONTEXT:
+                {sector_info}
+                """
+            
+            prompt = f"""
+            Today is {today}. Generate a detailed comparative analysis for these stocks: {', '.join(symbols)}.
+            
+            RETURNS DATA:
+            {returns_data}
+            
+            CORRELATION DATA:
+            {correlation_data}
+            
+            FINANCIAL RATIOS:
+            {financial_data}
+            
+            TECHNICAL INDICATORS:
+            {tech_data}
+            
+            {sector_context}
+            
+            Based on this data, provide a comprehensive comparative analysis with the following sections:
+            
+            1. Performance Comparison - Compare returns, volatility, and risk-adjusted metrics like Sharpe ratio
+            2. Correlation Analysis - Analyze how these stocks move in relation to each other and implications for portfolio diversification
+            3. Valuation Comparison - Compare valuation metrics like P/E, P/B, EV/EBITDA ratios
+            4. Financial Health Comparison - Compare profitability, margins, debt levels, and other financial indicators
+            5. Technical Outlook Comparison - Compare technical indicators and price momentum
+            6. Relative Strengths and Weaknesses - Highlight the comparative advantages and disadvantages of each stock
+            7. Investment Recommendation Ranking - Rank these stocks from most to least attractive for investment with reasoning
+            
+            Format your response in a clear, structured manner with sections and bullet points where appropriate.
+            Focus on actionable insights that would help an investor choose between these stocks.
+            """
+            
+            response = self.client.chat.completions.create(
+                model=self.default_model,
+                messages=[
+                    {"role": "system", "content": "You are a financial analyst specializing in comparative stock analysis and portfolio construction."},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.3,
+                max_tokens=3000
+            )
+            
+            return response.choices[0].message.content
+        except Exception as e:
+            return f"Error generating comparative analysis: {e}"

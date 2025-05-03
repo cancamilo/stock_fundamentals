@@ -258,25 +258,18 @@ class StockVisualization:
         return fig
     
     @staticmethod
-    def safe_plot_display(figure):
+    def safe_plot_display(figure, static=True):
         """
         Safely display a plotly figure, with fallback to a static image if nbformat is missing.
         
         Args:
             figure (plotly.graph_objects.Figure): Plotly figure to display
         """
-        try:
-            # Try to display the interactive plot
+        if not static:
             figure.show()
-        except ValueError as e:
-            if "nbformat" in str(e):
-                # If nbformat is missing or outdated, switch to a non-interactive display
-                print("Warning: Interactive plot could not be displayed due to missing or outdated nbformat.")
-                print("Displaying static plot instead. Run `!pip install nbformat>=4.2.0` and restart kernel for interactive plots.")
-                # Generate a static image
-                img_bytes = figure.to_image(format="png")
-                from IPython.display import Image, display
-                display(Image(img_bytes))
-            else:
-                # If it's another error, re-raise it
-                raise
+        else:
+            # Fallback to static display
+            img_bytes = figure.to_image(format="png")
+            from IPython.display import Image, display
+            display(Image(img_bytes))
+        
