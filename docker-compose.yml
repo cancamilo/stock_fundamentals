@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend/Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./src:/app/src  # Mount src for development, remove for production
+    restart: unless-stopped
+    networks:
+      - stock_app_network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend/Dockerfile
+    ports:
+      - "8080:8080"  # Map host port 8080 to container port 8000
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - stock_app_network
+
+networks:
+  stock_app_network:
+    driver: bridge

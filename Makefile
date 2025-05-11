@@ -26,3 +26,22 @@ status:
 	@pgrep -f "uvicorn src.api:app" > /dev/null && echo "Running" || echo "Not running"
 	@echo "Frontend server status:"
 	@pgrep -f "vite" > /dev/null && echo "Running" || echo "Not running"
+
+# Docker Compose commands
+docker-up:
+	@echo "Starting services with Docker Compose..."
+	docker-compose -f docker-compose.yml up -d --build
+	@echo "Services are running. Frontend at http://localhost:8080, Backend at http://localhost:8000"
+
+docker-down:
+	@echo "Stopping services with Docker Compose..."
+	docker-compose -f docker-compose.yml down
+	@echo "Services stopped."
+
+docker-logs:
+	@echo "Showing logs for Docker Compose services..."
+	docker-compose -f docker-compose.yml logs -f
+
+docker-status:
+	@echo "Docker Compose service status:"
+	docker-compose -f docker-compose.yml ps
