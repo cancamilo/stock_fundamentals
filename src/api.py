@@ -44,9 +44,8 @@ async def get_stock_analysis(ticker: str):
         stock_data = StockData(ticker)
         
         # Fetch stock data
-        if not stock_data.fetch_stock_data():
-            raise HTTPException(status_code=404, detail=f"Data for {ticker} not found")
-        
+        stock_data.fetch_stock_data()
+
         # Fetch financial statements
         stock_data.fetch_financial_statements()
         
@@ -67,12 +66,47 @@ async def get_stock_analysis(ticker: str):
                 
         # Get financial highlights
         financial_highlights = financial_analysis.get_financial_highlights()
-        
+
+        # Get historical price and volume data (2 years)
+        price_volume_data = []
+        if hasattr(stock_data, 'hist_data_2y') and stock_data.hist_data_2y is not None:
+            df = stock_data.hist_data_2y.reset_index()
+            for row in df.itertuples(index=False):
+                price_volume_data.append({
+                    'date': str(row.Date) if hasattr(row, 'Date') else str(row[0]),
+                    'close': float(row.Close),
+                    'volume': int(row.Volume)
+                })
+
+        # Optionally, add AI/News analysis and comprehensive report if available
+        news_analysis = None
+        comprehensive_report = None
+        try:
+            from src.ai_analysis import AIAnalysis
+            from src.reporting import ReportGenerator
+            ai = AIAnalysis()
+            company_name = company_info['company_name']
+            price_trends = stock_data.calculate_price_trends()
+            news_analysis = ai.get_news_analysis(company_name, ticker, price_trends)
+            comprehensive_report = ai.generate_comprehensive_report(
+                ticker,
+                stock_data.info,
+                financial_ratios,
+                None,  # recent_indicators, can be added if needed
+                news_analysis,
+                price_trends=price_trends
+            )
+        except Exception:
+            pass
+
         # Return combined data
         result = {
             "company_info": company_info,
             "financial_ratios": formatted_ratios,
-            "financial_highlights": financial_highlights
+            "financial_highlights": financial_highlights,
+            "price_volume_data": price_volume_data,
+            "news_analysis": news_analysis,
+            "comprehensive_report": comprehensive_report
         }
         
         return result

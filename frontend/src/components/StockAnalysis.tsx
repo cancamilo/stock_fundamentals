@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { getStockAnalysis } from '../api/stockApi';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Bar, CartesianGrid, Legend } from 'recharts';
+import ReactMarkdown from 'react-markdown';
 
 export function StockAnalysis() {
   const [ticker, setTicker] = useState('');
@@ -162,6 +164,66 @@ export function StockAnalysis() {
                 </div>
               </div>
             </div>
+
+            {/* Price & Volume Chart */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden mb-6">
+              <div className="px-6 py-5 border-b border-gray-200 dark:border-gray-700">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M3 3a1 1 0 000 2h10a1 1 0 100-2H3zm0 4a1 1 0 000 2h6a1 1 0 100-2H3zm0 4a1 1 0 100 2h4a1 1 0 100-2H3z" />
+                  </svg>
+                  Price & Volume (2 Years)
+                </h3>
+              </div>
+              <div className="p-6">
+                <ResponsiveContainer width="100%" height={320}>
+                  <LineChart data={stockData.price_volume_data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                    <XAxis dataKey="date" minTickGap={30} tick={{ fontSize: 12 }} />
+                    <YAxis yAxisId="left" domain={['auto', 'auto']} tick={{ fontSize: 12 }} />
+                    <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 12 }} />
+                    <Tooltip />
+                    <Legend />
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <Line yAxisId="left" type="monotone" dataKey="close" stroke="#2563eb" dot={false} name="Close Price" />
+                    <Bar yAxisId="right" dataKey="volume" fill="#a5b4fc" name="Volume" barSize={8} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* AI/News Analysis (if available) */}
+            {stockData.news_analysis && (
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden mb-6">
+                <div className="px-6 py-5 border-b border-gray-200 dark:border-gray-700">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M18 13a1 1 0 01-1 1H3a1 1 0 110-2h14a1 1 0 011 1z" />
+                    </svg>
+                    News & AI Analysis
+                  </h3>
+                </div>
+                <div className="p-6 prose dark:prose-invert max-w-none">
+                  <ReactMarkdown>{stockData.news_analysis}</ReactMarkdown>
+                </div>
+              </div>
+            )}
+
+            {/* Comprehensive Report (if available) */}
+            {stockData.comprehensive_report && (
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden mb-6">
+                <div className="px-6 py-5 border-b border-gray-200 dark:border-gray-700">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M4 3a1 1 0 000 2h12a1 1 0 100-2H4zm0 4a1 1 0 000 2h12a1 1 0 100-2H4zm0 4a1 1 0 100 2h12a1 1 0 100-2H4z" />
+                    </svg>
+                    Investment Analysis Report
+                  </h3>
+                </div>
+                <div className="p-6 prose dark:prose-invert max-w-none">
+                  <ReactMarkdown>{stockData.comprehensive_report}</ReactMarkdown>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

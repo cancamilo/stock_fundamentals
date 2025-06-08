@@ -32,7 +32,7 @@ class StockData:
         self.cash_flow_quarterly = None
         self.info = None
         
-    def fetch_stock_data(self, years=2):
+    def fetch_stock_data(self, years=0.2):
         """
         Fetch historical stock data for the specified number of years.
         
